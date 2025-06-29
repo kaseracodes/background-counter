@@ -1,6 +1,12 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
 const path = require('path');
 
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+  return;
+}
+
 const db = require('./db.cjs');
 
 let tray = null;
@@ -51,6 +57,17 @@ app.whenReady().then(() => {
     console.log('Counter electron/main.cjs:', newValue);
   }, 4000);
 });
+
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  } else {
+    createWindow(); // recreate window if it was destroyed
+  }
+});
+
 
 ipcMain.handle('get-counter', async () => {
   const row = db.prepare('SELECT value FROM counters WHERE id = 1').get();
