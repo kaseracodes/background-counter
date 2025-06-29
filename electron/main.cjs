@@ -1,9 +1,10 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
 const path = require('path');
 
+const db = require('./db.cjs');
+
 let tray = null;
 let mainWindow = null;
-let counter = 0;
 const isDev = !app.isPackaged;
 
 function createWindow() {
@@ -44,11 +45,21 @@ app.whenReady().then(() => {
   ]));
 
   setInterval(() => {
-    counter++;
-    console.log('Counter electron/main.cjs:', counter);
-  }, 1000);
+    const current = db.prepare('SELECT value FROM counters WHERE id = 1').get()?.value || 0;
+    const newValue = current + 1;
+    db.prepare('INSERT OR REPLACE INTO counters (id, value) VALUES (1, ?)').run(newValue);
+    console.log('Counter electron/main.cjs:', newValue);
+  }, 4000);
 });
 
 ipcMain.handle('get-counter', async () => {
-  return counter;
+  const row = db.prepare('SELECT value FROM counters WHERE id = 1').get();
+  return row?.value;
+});
+
+ipcMain.handle('increment-counter', () => {
+  const current = db.prepare('SELECT value FROM counters WHERE id = 1').get()?.value || 0;
+  const newValue = current + 1;
+  db.prepare('INSERT OR REPLACE INTO counters (id, value) VALUES (1, ?)').run(newValue);
+  return newValue;
 });

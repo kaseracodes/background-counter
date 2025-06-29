@@ -12,10 +12,16 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleClick = async () => {
+    const updated = await window.electronAPI.incrementCounter();
+    setCount(updated);
+  };
+
   return (
     <div style={{ textAlign: 'center', marginTop: '40px' }}>
       <h2>Electron Background Counter</h2>
       <p style={{ fontSize: '48px' }}>{count}</p>
+      <button onClick={handleClick}>Increment</button>
     </div>
   );
 }

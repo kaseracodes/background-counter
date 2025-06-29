@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "pack": "electron-builder --dir",
     "preview": "vite preview",
-    "dist": "vite build && electron-builder"
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "dist": "vite build && npm run rebuild && electron-builder"
   },
   "build": {
     "appId": "com.example.counterapp",
@@ -18,7 +19,14 @@
     "files": [
       "dist",
       "electron/**/*",
-      "package.json"
+      "package.json",
+      "!**/*.map"
+    ],
+    "extraResources": [
+      {
+        "from": "node_modules/better-sqlite3/build/Release/better_sqlite3.node",
+        "to": "better_sqlite3.node"
+      }
     ],
     "directories": {
       "buildResources": "assets"
@@ -29,6 +37,7 @@
     }
   },
   "dependencies": {
+    "better-sqlite3": "^12.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
@@ -41,6 +50,7 @@
     "cross-env": "^7.0.3",
     "electron": "^37.1.0",
     "electron-builder": "^26.0.12",
+    "electron-rebuild": "^3.2.9",
     "eslint": "^9.29.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
